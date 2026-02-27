@@ -2,8 +2,8 @@
 showErrorDetails = false
 toolbarMode = "minimal"
 
-[deployment]
-showDeploymentButton = false
+# [deployment]
+# showDeploymentButton = false
 
 [server]
 # Ensures the app only listens to your local machine, not the network
