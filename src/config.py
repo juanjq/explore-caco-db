@@ -33,4 +33,7 @@ FSM_VARS = ["CACO_CameraControl_FSM_previous_state", "CACO_CameraControl_FSM_sta
 ALLOWED_SUFFIXES = ["_min", "_hour", "_day", "_week"]
 
 # Safety limits
-SAFE_QUERY_LIMIT = 40000
+SAFE_QUERY_LIMIT = 100000
+
+# Query execution timeframe (milliseconds). 30 seconds default.
+MAX_QUERY_TIME_MS = 60_000
