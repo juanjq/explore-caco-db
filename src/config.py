@@ -31,3 +31,6 @@ INTEGER_VARS = ["RunNumber", "EVB_run_number"]
 FSM_VARS = ["CACO_CameraControl_FSM_previous_state", "CACO_CameraControl_FSM_state"]
 
 ALLOWED_SUFFIXES = ["_min", "_hour", "_day", "_week"]
+
+# Safety limits
+SAFE_QUERY_LIMIT = 50000
