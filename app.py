@@ -106,7 +106,7 @@ if st.sidebar.button("Fetch data & plot"):
             
             # Generate  plot
             fig = generate_plot(data_by_var, selected_vars, show_y_projection, use_night_preset, start_dt, end_dt)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             # Table and download
             all_df = pd.DataFrame(all_data)
