@@ -1,12 +1,15 @@
 from datetime import datetime
+import os 
 
 # Database port of client + name
 MONGO_URI = "mongodb://localhost:27018/"
 DATABASE_NAME = "CACO"
 
 # Assets
-LOGO_PATH = "static/caco_logo.png"
-ICON_PATH = "static/icon.png"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.dirname(current_dir) 
+LOGO_PATH = os.path.join(repo_root, "static", "caco_logo.png")
+ICON_PATH = os.path.join(repo_root, "static", "icon.png")
 
 # Constants
 MIN_DATE = datetime(2000, 1, 1)

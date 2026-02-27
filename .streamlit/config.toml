@@ -6,7 +6,6 @@ toolbarMode = "minimal"
 # showDeploymentButton = false
 
 [server]
-# Ensures the app only listens to your local machine, not the network
 address = "127.0.0.1"
 
 [browser]
