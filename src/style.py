@@ -13,7 +13,13 @@ def apply_custom_styles():
         <style>
             /* Main Layout */
             .stApp {{ background-color: #ffffff; color: #001F54; }}
-            [data-testid="stSidebar"] {{ background-color: #F0F2F6; }}
+            
+            /* --- SIDEBAR WIDTH & STYLE --- */
+            [data-testid="stSidebar"] {{ 
+                background-color: #F0F2F6; 
+                min-width: 450px !important;
+                max-width: 450px !important;
+            }}
 
             /* Sidebar Logo Bar */
             [data-testid="stSidebar"]::before {{
