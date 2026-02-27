@@ -17,8 +17,8 @@ def apply_custom_styles():
             /* --- SIDEBAR WIDTH & STYLE --- */
             [data-testid="stSidebar"] {{ 
                 background-color: #F0F2F6; 
-                min-width: 450px !important;
-                max-width: 450px !important;
+                min-width: 550px !important;
+                max-width: 750px !important;
             }}
 
             /* Sidebar Logo Bar */
