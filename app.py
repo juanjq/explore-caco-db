@@ -1,22 +1,70 @@
 import streamlit as st
+import os
+import base64
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta, time
 
 # Custom modules
-from src.config import MIN_DATE, DATABASE_NAME
+from src.config import MIN_DATE, DATABASE_NAME, TELESCOPES, DEFAULT_TELESCOPE, ICON_PATH
 from src.style import apply_custom_styles
 from src.database import get_db, get_mongo_connection_info, get_filtered_collections, fetch_data
 from src.processor import process_data_by_var
 from src.plot import generate_plot
 
-# Applying the web colors / font / style
+# Initial page config (must be set before any Streamlit UI calls)
+st.set_page_config(page_title="CaCo db query engine", layout="wide", page_icon=ICON_PATH)
+
+SOFT_TELESCOPE_COLORS = {
+    "LST1": "#E6F2FF",
+    "LST2": "#E8F8E8",
+    "LST3": "#FFF4E1",
+    "LST4": "#F2E6FF",
+}
+
+if "selected_telescope" not in st.session_state:
+    st.session_state.selected_telescope = DEFAULT_TELESCOPE
+
+query_params = st.experimental_get_query_params()
+selected_telescope = query_params.get("telescope", [st.session_state.selected_telescope])[0]
+if selected_telescope not in TELESCOPES:
+    selected_telescope = DEFAULT_TELESCOPE
+st.session_state.selected_telescope = selected_telescope
+
+# Apply styles and update browser tab title dynamically via JS
 apply_custom_styles()
+st.markdown(f"<script>document.title = '{selected_telescope} CaCo db query engine';</script>", unsafe_allow_html=True)
+
+# Update favicon dynamically to a telescope-specific placeholder icon (base64 inline)
+try:
+    base_dir = os.path.dirname(__file__)
+    candidate = os.path.join(base_dir, "static", f"icon_{selected_telescope}.png")
+    if not os.path.exists(candidate):
+        candidate = ICON_PATH
+    with open(candidate, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    st.markdown(f"<link rel='icon' href='data:image/png;base64,{b64}' />", unsafe_allow_html=True)
+except Exception:
+    pass
+
+sidebar_color = SOFT_TELESCOPE_COLORS.get(selected_telescope, "#F0F2F6")
+st.markdown(f"<style>[data-testid='stSidebar'] {{ background-color: {sidebar_color}; }}</style>", unsafe_allow_html=True)
+
+button_row = "<div class='telescope-row'>"
+for telescope_name in TELESCOPES:
+    selected_class = "selected" if telescope_name == selected_telescope else ""
+    button_row += (
+        f"<a class='telescope-btn {telescope_name.lower()} {selected_class}' "
+        f"href='?telescope={telescope_name}'>{telescope_name}</a>"
+    )
+button_row += "</div>"
+st.sidebar.markdown(button_row, unsafe_allow_html=True)
+
 st.title("CaCo db query engine")
 
 # Connection to MongoDB
-db = get_db()
-host, port = get_mongo_connection_info()
+db = get_db(st.session_state.selected_telescope)
+host, port = get_mongo_connection_info(st.session_state.selected_telescope)
 
 # Sidebar setup + selection logic
 st.sidebar.header("Query parameters")
@@ -36,6 +84,21 @@ col_ref = db[selected_col]
 # Variable selection
 try:
     var_list = np.sort(list(col_ref.distinct("name")))
+    
+    # Style variables multiselect to display in 1 row
+    st.markdown("""
+    <style>
+        div[data-testid='stMultiSelect'] [data-baseweb='tag'] {
+            display: inline-flex;
+            white-space: nowrap;
+        }
+        div[data-testid='stMultiSelect'] {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
     selected_vars = st.sidebar.multiselect("Select variables", options=var_list, help="Click to add/remove variables")
 except Exception as e:
     st.error(f"Error fetching variables: {e}")

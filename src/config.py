@@ -5,6 +5,32 @@ import os
 MONGO_URI = "mongodb://localhost:27018/"
 DATABASE_NAME = "CACO"
 
+# Telescope configurations
+TELESCOPES = {
+    "LST1": {
+        "uri": "mongodb://lst101-int:27018/",
+        "db_name": "CACO_1",
+        "port": 27018,
+    },
+    "LST2": {
+        "uri": "mongodb://lst102-int:27020/",
+        "db_name": "CACO_2",
+        "port": 27018,
+    },
+    "LST3": {
+        "uri": "mongodb://lst103-int:27021/",
+        "db_name": "CACO_3",
+        "port": 27018,
+    },
+    "LST4": {
+        "uri": "mongodb://lst104-int:27019/",
+        "db_name": "CACO_4",
+        "port": 27018,
+    }
+}
+
+DEFAULT_TELESCOPE = "LST1"
+
 # Assets
 current_dir = os.path.dirname(os.path.abspath(__file__))
 repo_root = os.path.dirname(current_dir) 

@@ -1,19 +1,34 @@
 import pymongo
 import streamlit as st
 from pymongo.errors import ExecutionTimeout
-from src.config import MONGO_URI, DATABASE_NAME, ALLOWED_SUFFIXES, SAFE_QUERY_LIMIT, MAX_QUERY_TIME_MS
+from src.config import ALLOWED_SUFFIXES, SAFE_QUERY_LIMIT, MAX_QUERY_TIME_MS, TELESCOPES, DEFAULT_TELESCOPE
 
 @st.cache_resource
-def get_db():
-    client = pymongo.MongoClient(MONGO_URI)
-    return client[DATABASE_NAME]
+def _get_mongo_client(uri):
+    """Create and cache MongoDB client for a specific URI."""
+    return pymongo.MongoClient(uri)
 
-def get_mongo_connection_info():
+
+def get_db(telescope=DEFAULT_TELESCOPE):
+    """Get database connection for the specified telescope."""
+    if telescope not in TELESCOPES:
+        telescope = DEFAULT_TELESCOPE
+    
+    telescope_config = TELESCOPES[telescope]
+    client = _get_mongo_client(telescope_config["uri"])
+    return client[telescope_config["db_name"]]
+
+def get_mongo_connection_info(telescope=DEFAULT_TELESCOPE):
     """Extracts host and port for display purposes."""
-    mongo_host = MONGO_URI.replace("mongodb://", "").replace("/", "")
+    if telescope not in TELESCOPES:
+        telescope = DEFAULT_TELESCOPE
+    
+    telescope_config = TELESCOPES[telescope]
+    uri = telescope_config["uri"]
+    mongo_host = uri.replace("mongodb://", "").replace("/", "")
     if ":" in mongo_host:
         return mongo_host.split(":")
-    return mongo_host, "27017"
+    return mongo_host, str(telescope_config["port"])
 
 def get_filtered_collections(db):
     """Returns collections that match the allowed resolution suffixes."""
@@ -52,5 +67,5 @@ def fetch_data(collection, selected_vars, start_dt, end_dt):
     try:
         return list(collection.find(query, max_time_ms=MAX_QUERY_TIME_MS).sort("date", 1))
     except ExecutionTimeout:
-        st.error("Query exceeded maximum execution time (60 s). Please narrow your filters.")
+        st.error("Query exceeded maximum execution time (60s). Please narrow your filters.")
         return []
