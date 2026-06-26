@@ -25,7 +25,7 @@ SOFT_TELESCOPE_COLORS = {
 if "selected_telescope" not in st.session_state:
     st.session_state.selected_telescope = DEFAULT_TELESCOPE
 
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 selected_telescope = query_params.get("telescope", [st.session_state.selected_telescope])[0]
 if selected_telescope not in TELESCOPES:
     selected_telescope = DEFAULT_TELESCOPE
