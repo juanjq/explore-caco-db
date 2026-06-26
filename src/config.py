@@ -13,17 +13,17 @@ TELESCOPES = {
         "port": 27018,
     },
     "LST2": {
-        "uri": "mongodb://lst102-int:27018/",
+        "uri": "mongodb://lst201-int:27018/",
         "db_name": "CACO",
         "port": 27018,
     },
     "LST3": {
-        "uri": "mongodb://lst103-int:27018/",
+        "uri": "mongodb://lst301-int:27018/",
         "db_name": "CACO",
         "port": 27018,
     },
     "LST4": {
-        "uri": "mongodb://lst104-int:27018/",
+        "uri": "mongodb://lst401-int:27018/",
         "db_name": "CACO",
         "port": 27018,
     }

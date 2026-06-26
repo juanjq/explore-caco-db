@@ -25,11 +25,29 @@ SOFT_TELESCOPE_COLORS = {
 if "selected_telescope" not in st.session_state:
     st.session_state.selected_telescope = DEFAULT_TELESCOPE
 
-query_params = st.query_params
-selected_telescope = query_params.get("telescope", [st.session_state.selected_telescope])[0]
+if hasattr(st, "experimental_get_query_params"):
+    query_params = st.experimental_get_query_params()
+elif hasattr(st, "get_query_params"):
+    query_params = st.get_query_params()
+elif hasattr(st, "query_params"):
+    query_params = st.query_params
+else:
+    query_params = {}
+
+selected_telescope_value = query_params.get("telescope", st.session_state.selected_telescope)
+if isinstance(selected_telescope_value, (list, tuple)):
+    selected_telescope = selected_telescope_value[0] if selected_telescope_value else st.session_state.selected_telescope
+else:
+    selected_telescope = selected_telescope_value
+
 if selected_telescope not in TELESCOPES:
     selected_telescope = DEFAULT_TELESCOPE
 st.session_state.selected_telescope = selected_telescope
+
+if hasattr(st, "experimental_set_query_params"):
+    st.experimental_set_query_params(telescope=selected_telescope)
+elif hasattr(st, "set_query_params"):
+    st.set_query_params(telescope=selected_telescope)
 
 # Apply styles and update browser tab title dynamically via JS
 apply_custom_styles()
@@ -63,12 +81,31 @@ st.sidebar.markdown(button_row, unsafe_allow_html=True)
 st.title("CaCo db query engine")
 
 # Connection to MongoDB
-db = get_db(st.session_state.selected_telescope)
-host, port = get_mongo_connection_info(st.session_state.selected_telescope)
+try:
+    db = get_db(st.session_state.selected_telescope)
+    host, port = get_mongo_connection_info(st.session_state.selected_telescope)
+except Exception as exc:
+    st.error(
+        f"No database is available for telescope '{selected_telescope}'. "
+    )
+    st.info(f"Connection details: {exc}")
+    st.stop()
 
 # Sidebar setup + selection logic
 st.sidebar.header("Query parameters")
-filtered_collections = get_filtered_collections(db)
+try:
+    filtered_collections = get_filtered_collections(db)
+except Exception as exc:
+    st.error(f"Could not read collections for telescope '{selected_telescope}'.")
+    st.info(f"Details: {exc}")
+    st.stop()
+
+if not filtered_collections:
+    st.warning(
+        f"No data collections are available yet for telescope '{selected_telescope}'. "
+    )
+    st.stop()
+
 base_collections = sorted(list(set(col.rsplit("_", 1)[0] for col in filtered_collections)))
 
 selected_base = st.sidebar.selectbox("Select collection", options=base_collections)
@@ -182,3 +219,4 @@ if st.sidebar.button("Fetch data & plot"):
 st.sidebar.markdown("---")
 st.sidebar.caption(f"Connected to MongoDB | {host}:{port} | DB: {DATABASE_NAME}")
 st.sidebar.caption("Problems or suggestions: juan.jimenez@ifae.es")
+
